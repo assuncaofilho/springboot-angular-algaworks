@@ -39,7 +39,7 @@ public class CategoriaResource {
 		Categoria categoriaSalva = categoriaRepository.save(categoria);
 		
 		/*{codigo} pode ser usado livremente e o Spring o detecta como atributo de Categoria, pois 
-		 * ao injetarmos categoriaRepository a mesma conhece a impl de JpaRepository<Categoria,Long>*/
+		 * ao injetarmos categoriaRepository a mesma conhece a impl de JpaRepository<Categoria,Long> ?*/
 		
 		URI uri = ServletUriComponentsBuilder.fromCurrentRequestUri().path("/{codigo}") // {codigo} é variável (Expression Language)
 		.buildAndExpand(categoriaSalva.getCodigo()).toUri();
@@ -50,9 +50,20 @@ public class CategoriaResource {
 	}
 	
 	@GetMapping("/{codigo}")
-	public Categoria buscarPeloCodigo(@PathVariable Long codigo) {
+	public ResponseEntity<Categoria> buscarPeloCodigo(@PathVariable Long codigo) {
 		Optional<Categoria> categoriaBuscada = categoriaRepository.findById(codigo);
-		return categoriaBuscada.get();
+		
+		/*
+		if(categoriaBuscada.isPresent()) { // avaliando o objeto Optional<Categoria>
+		
+		return ResponseEntity.ok(categoriaBuscada.get());
+		}
+		else {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+		}
+		*/
+		
+		return categoriaBuscada.isPresent() == true ? ResponseEntity.ok(categoriaBuscada.get()) : ResponseEntity.notFound().build();
 	}
 
 }
