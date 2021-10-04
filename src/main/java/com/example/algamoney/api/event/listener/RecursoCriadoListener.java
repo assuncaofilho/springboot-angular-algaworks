@@ -26,7 +26,8 @@ public class RecursoCriadoListener implements ApplicationListener<RecursoCriadoE
 	/**/
 	private void adicionarHeaderLocation(HttpServletResponse response, Long codigo) {
 		
-		URI uri = ServletUriComponentsBuilder.fromCurrentRequestUri().path("/{}") // {codigo} é variável (Expression Language)
+		/*O argumento de buildAndExpand será injetado em {codigo}*/
+		URI uri = ServletUriComponentsBuilder.fromCurrentRequestUri().path("/{codigo}") // o param {xxxx} pode ser qualquer coisa;
 		.buildAndExpand(codigo).toUri();
 		
 		response.setHeader("Locations", uri.toASCIIString());
