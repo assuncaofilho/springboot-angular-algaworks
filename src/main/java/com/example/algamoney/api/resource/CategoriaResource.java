@@ -51,15 +51,6 @@ public class CategoriaResource {
 	public ResponseEntity<Categoria> buscarPeloCodigo(@PathVariable Long codigo) {
 		Optional<Categoria> categoriaBuscada = categoriaRepository.findById(codigo);
 		
-		/*
-		if(categoriaBuscada.isPresent()) { // avaliando o objeto Optional<Categoria>
-		
-		return ResponseEntity.ok(categoriaBuscada.get());
-		}
-		else {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-		}
-		*/
 		
 		return categoriaBuscada.isPresent() == true ? ResponseEntity.ok(categoriaBuscada.get()) : ResponseEntity.notFound().build();
 	}
