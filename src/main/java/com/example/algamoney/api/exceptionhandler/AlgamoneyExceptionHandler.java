@@ -5,9 +5,11 @@ package com.example.algamoney.api.exceptionhandler;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -55,8 +57,19 @@ public class AlgamoneyExceptionHandler extends ResponseEntityExceptionHandler{
 		return handleExceptionInternal(ex, erros, new HttpHeaders(), HttpStatus.NOT_FOUND, request);
 	}
 	
+	@ExceptionHandler({ DataIntegrityViolationException.class })
+	public ResponseEntity<Object> handleDataIntegrityViolationException(DataIntegrityViolationException ex, WebRequest request){
+		
+		String mensagemUsuario = messageSource.getMessage("recurso.operacao-nao-permitida", null, LocaleContextHolder.getLocale());
+		String mensagemDesenvolvedor = ExceptionUtils.getRootCauseMessage(ex); // utilizando dependência commons-lang3 (apache); 
+		
+		List<Erro> erros = new ArrayList<Erro>();
+		erros.add(new Erro(mensagemUsuario, mensagemDesenvolvedor));
+		return handleExceptionInternal(ex, erros, new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
+	}
 	
-	@Override
+	/*Sobrescrição do método que trata as exceções geradas por campos não válidos.*/
+	@Override 
 	protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
 			HttpHeaders headers, HttpStatus status, WebRequest request) {
 		
@@ -81,6 +94,7 @@ public class AlgamoneyExceptionHandler extends ResponseEntityExceptionHandler{
 	
 	public static class Erro { // não tem acesso aos membros de instância da classe externa (nested static class)
 							  // Ela possui acesso aos membros estáticos da classe que a contém.
+							 // Pode ser utilizada em outras classes por ser pública e não necessita de variável de instância;
 		
 		
 		

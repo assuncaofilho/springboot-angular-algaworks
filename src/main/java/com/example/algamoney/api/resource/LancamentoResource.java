@@ -1,5 +1,6 @@
 package com.example.algamoney.api.resource;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -8,8 +9,11 @@ import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,8 +22,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.algamoney.api.event.RecursoCriadoEvent;
+import com.example.algamoney.api.exceptionhandler.AlgamoneyExceptionHandler.Erro;
 import com.example.algamoney.api.model.Lancamento;
 import com.example.algamoney.api.repository.LancamentoRepository;
+import com.example.algamoney.api.service.LancamentoService;
+import com.example.algamoney.api.service.exception.PessoaInexistenteOuInativaException;
 
 @RestController
 @RequestMapping("/lancamentos")
@@ -29,7 +36,13 @@ public class LancamentoResource {
 	private LancamentoRepository lancamentoRepository;
 	
 	@Autowired
+	private LancamentoService lancamentoService;
+	
+	@Autowired
 	private ApplicationEventPublisher publisher;
+	
+	@Autowired
+	private MessageSource messageSource;
 	
 	@GetMapping
 	public List<Lancamento> listar(){
@@ -49,11 +62,24 @@ public class LancamentoResource {
 	@PostMapping
 	public ResponseEntity<Lancamento> criar(@Valid @RequestBody Lancamento lancamento, HttpServletResponse response){
 	
-		Lancamento lancamentoSalvo = lancamentoRepository.save(lancamento);
+		/*Caso ocorra exceção o @ExceptionHandler de PessoaInexistenteOuInativaException.class será acionado*/
+		Lancamento lancamentoSalvo = lancamentoService.salvar(lancamento); 
 		
 		publisher.publishEvent(new RecursoCriadoEvent(this, response, lancamentoSalvo.getCodigo()));
 		
 		return ResponseEntity.status(HttpStatus.CREATED).body(lancamentoSalvo);
+	}
+	
+	/*Como trata-se de uma exceção específica para Lançamento, trata-se a mesma na própria classe de LancamentoResource
+	 * Isto é, no controlador de Lancamento*/
+	@ExceptionHandler({ PessoaInexistenteOuInativaException.class })
+	public ResponseEntity<Object> handlePessoaInexistenteOuInativaException(PessoaInexistenteOuInativaException ex){
+		
+		String mensagemUsuario = messageSource.getMessage("pessoa.inexistente-ou-inativa", null, LocaleContextHolder.getLocale());
+		String mensagemDesenvolvedor = ex.toString();
+		List<Erro> erros = new ArrayList<Erro>();
+		erros.add(new Erro(mensagemUsuario, mensagemDesenvolvedor));
+		return ResponseEntity.badRequest().body(erros);
 	}
 
 
