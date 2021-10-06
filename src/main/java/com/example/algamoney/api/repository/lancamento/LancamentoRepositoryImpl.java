@@ -88,10 +88,10 @@ public class LancamentoRepositoryImpl implements LancamentoRepositoryQuery{
 
 	private void adicionarRestricoesDePaginacao(TypedQuery<Lancamento> typedQuery, Pageable pageable) {
 		int paginaAtual = pageable.getPageNumber();
-		int totalRegistrosPorPagina = pageable.getPageSize();
+		int totalRegistrosPorPagina = pageable.getPageSize(); // pageable vem setado do Cliente;
 		int primeiroRegistroDaPagina = paginaAtual * totalRegistrosPorPagina;
 		
-		typedQuery.setFirstResult(primeiroRegistroDaPagina);
+		typedQuery.setFirstResult(primeiroRegistroDaPagina); // o primeiro resultado inicia em 0;
 		typedQuery.setMaxResults(totalRegistrosPorPagina);
 		
 	}
