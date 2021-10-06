@@ -11,6 +11,9 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.util.ObjectUtils;
 
 import com.example.algamoney.api.model.Lancamento;
@@ -20,16 +23,16 @@ import com.example.algamoney.api.repository.filter.LancamentoFilter;
 public class LancamentoRepositoryImpl implements LancamentoRepositoryQuery{
 
 	@PersistenceContext
-	private EntityManager Entitymanager;
+	private EntityManager entitymanager;
 	
 	/*Utilizar-se-á a Criteria do JPA*/
 	@Override
-	public List<Lancamento> filtrar(LancamentoFilter lancamentoFilter) {
+	public Page<Lancamento> filtrar(LancamentoFilter lancamentoFilter, Pageable pageable) {
 		
 		/*CriteriaBuilder -> CriteriaQuery -> TypedQuery -> .getResultList()*/
 		
 		//obtendo o objeto CriteriaBuilder, a partir de um EntityManager
-		CriteriaBuilder builder = Entitymanager.getCriteriaBuilder();
+		CriteriaBuilder builder = entitymanager.getCriteriaBuilder();
 		
 		//CriteriaQuery define por sua vez a entidade principal a ser utilizada 
 		//na query – aqui no caso a classe Lancamento
@@ -48,10 +51,14 @@ public class LancamentoRepositoryImpl implements LancamentoRepositoryQuery{
 		Predicate[] predicates = criarRestricoes(lancamentoFilter, builder, root);
 		criteriaQuery.where(predicates);
 		
+		TypedQuery<Lancamento> typedQuery = entitymanager.createQuery(criteriaQuery);
+		adicionarRestricoesDePaginacao(typedQuery, pageable);
 		
-		TypedQuery<Lancamento> typedQuery = Entitymanager.createQuery(criteriaQuery);
-		return typedQuery.getResultList();
+		return new PageImpl<>(typedQuery.getResultList(), pageable, total(lancamentoFilter)) ;
 	}
+
+
+
 
 	private Predicate[] criarRestricoes(LancamentoFilter lancamentoFilter, CriteriaBuilder builder,Root<Lancamento> root) {
 		
@@ -79,4 +86,26 @@ public class LancamentoRepositoryImpl implements LancamentoRepositoryQuery{
 		//return predicates.toArray(predicate);
 	}
 
+	private void adicionarRestricoesDePaginacao(TypedQuery<Lancamento> typedQuery, Pageable pageable) {
+		int paginaAtual = pageable.getPageNumber();
+		int totalRegistrosPorPagina = pageable.getPageSize();
+		int primeiroRegistroDaPagina = paginaAtual * totalRegistrosPorPagina;
+		
+		typedQuery.setFirstResult(primeiroRegistroDaPagina);
+		typedQuery.setMaxResults(totalRegistrosPorPagina);
+		
+	}
+	private Long total(LancamentoFilter lancamentoFilter) {
+		
+		CriteriaBuilder builder = entitymanager.getCriteriaBuilder();
+		CriteriaQuery<Long> criteriaQuery = builder.createQuery(Long.class); // tipo de retorno
+		Root<Lancamento> root = criteriaQuery.from(Lancamento.class); // entidade na qual será realizada a consulta
+		
+		Predicate[] predicates = criarRestricoes(lancamentoFilter, builder, root);
+		criteriaQuery.where(predicates);
+		
+		criteriaQuery.select(builder.count(root));
+		return entitymanager.createQuery(criteriaQuery).getSingleResult();
+		
+	}
 }
