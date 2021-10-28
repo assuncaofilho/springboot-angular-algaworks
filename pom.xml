@@ -96,7 +96,7 @@
 		<dependency>
 		    <groupId>org.hibernate</groupId>
 		    <artifactId>hibernate-jpamodelgen</artifactId>
-		    <scope>provided</scope>
+		    <!-- <scope>provided</scope> -->
 		</dependency>
 
 		<dependency>
@@ -107,7 +107,6 @@
 	</dependencies>
 
 	<build>
-		<sourceDirectory>src</sourceDirectory>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
