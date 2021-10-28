@@ -93,11 +93,11 @@
     		<artifactId>commons-lang3</artifactId>
     		<version>3.12.0</version>
     	</dependency>
-		<dependency>
+	<!--	<dependency>
 		    <groupId>org.hibernate</groupId>
 		    <artifactId>hibernate-jpamodelgen</artifactId>
-		    <!-- <scope>provided</scope> -->
-		</dependency>
+		     <scope>provided</scope> 
+		</dependency> --> <!-- é necessário comentar pois o anotation-processor é acionado e gera as classes novamente na compilação -->
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
