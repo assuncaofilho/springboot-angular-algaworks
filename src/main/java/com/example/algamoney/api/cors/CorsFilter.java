@@ -21,10 +21,10 @@ import com.example.algamoney.api.config.property.AlgamoneyApiProperty;
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class CorsFilter implements Filter{
 	
-	@Autowired
-	private AlgamoneyApiProperty algamoneyApiProperty;
+	//@Autowired
+	//private AlgamoneyApiProperty algamoneyApiProperty;
 	
-	private String originPermitida = algamoneyApiProperty.getOriginPermitida();
+	private String originPermitida = "http://localhost:8000"; //algamoneyApiProperty.getOriginPermitida();
 
 	@Override
 	public void doFilter(ServletRequest req, ServletResponse resp, FilterChain chain)
