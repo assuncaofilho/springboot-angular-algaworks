@@ -1,6 +1,7 @@
 package com.example.algamoney.api.config.property;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
 @ConfigurationProperties("algamoney")
@@ -14,7 +15,8 @@ import org.springframework.stereotype.Component;
 		public Seguranca getSeguranca() {
 			return seguranca;
 		}
-
+		
+		@Bean
 		public String getOriginPermitida() {
 			return originPermitida;
 		}
